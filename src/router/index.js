@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { inject } from 'vue'
+import NProgress from 'nprogress'
 import EventListView from '@/views/EventListView.vue'
 import EventLayout from '@/views/event/layout.vue'
 import EventDetails from '@/views/event/Details.vue'
@@ -7,6 +9,7 @@ import EventEdit from '@/views/event/Edit.vue'
 import AboutView from '@/views/AboutView.vue'
 import NotFound from "@/views/NotFound.vue"
 import NetworkError from "@/views/NetworkError.vue"
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,6 +40,8 @@ const router = createRouter({
           path: 'edit',
           name: 'event-edit',
           component: EventEdit,
+          // requireAuth is going to be inherited by child routes
+          meta: { requireAuth: true}
         },
       ]
     },
@@ -76,6 +81,26 @@ const router = createRouter({
       component: NetworkError,
     },
   ],
+})
+
+router.beforeEach((to, from) => {
+  const GStore = inject('GStore')
+  NProgress.start()
+
+  const notAuthorized = true
+  if (to.meta.requireAuth && notAuthorized){
+    GStore.flashMessage = 'Sorry, you are not authorized to view this page'
+    setTimeout(() => {
+      GStore.flashMessage = ''
+      NProgress.done()
+    }, 3000)
+
+    if (from.href){
+      return false
+    } else {
+      return { path: '/'}
+    }
+  }
 })
 
 export default router
