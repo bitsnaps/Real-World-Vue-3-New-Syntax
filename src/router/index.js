@@ -16,7 +16,7 @@ const router = createRouter({
       props: route => ({ page: parseInt(route.query.page) || 1})
     },
     {
-      path: '/event/:id',
+      path: '/events/:id',
       name: 'event-layout',
       props: true,
       component: EventLayout,
@@ -38,10 +38,23 @@ const router = createRouter({
         },
       ]
     },
-
+    {
+      path: '/event/:afterEvent(.*)',
+      // path: '/event/:id', // Use this to apply redirect children
+      redirect: (to) => {
+        // return { name: 'event-details' } // Use this to apply redirect children
+        return { path: `/events/${to.params.afterEvent}` }
+      },
+      /*/ Redirect path can have children too
+      children: [
+        { path: 'register', redirect: () => { name: 'event-register'}},
+        { path: 'edit', redirect: () => { name: 'event-edit'}}
+      ]*/
+    },
     {
       path: '/about',
       name: 'about',
+      alias: '/about-us',
       component: AboutView,
     },
   ],
